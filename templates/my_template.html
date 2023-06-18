@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Detection</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="capture">Capture</button>
+
+    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capture');
+
+        // Get access to the camera stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.log('Error accessing camera:', error);
+            });
+
+        // Capture the current frame from the video stream
+        function captureFrame() {
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+            return imageData;
+        }
+
+        // Send the captured frame to the server for emotion detection
+        function sendFrame(imageData) {
+            fetch('/capture/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}', // Replace with the appropriate template variable
+                },
+                body: 'image_data=' + encodeURIComponent(imageData),
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                displayEmotions(data.emotion_list);
+            })
+            .catch(function(error) {
+                console.log('Error:', error);
+            });
+        }
+
+        // Display the detected emotions on the webpage
+        function displayEmotions(emotionList) {
+            // Clear the previous emotions
+            const emotionDiv = document.getElementById('emotion-div');
+            emotionDiv.innerHTML = '';
+
+            // Create a new element for each emotion
+            emotionList.forEach(function(emotion) {
+                const emotionElement = document.createElement('p');
+                emotionElement.textContent = emotion;
+                emotionDiv.appendChild(emotionElement);
+            });
+        }
+
+        // Event listener for the capture button
+        captureButton.addEventListener('click', function() {
+            const imageData = captureFrame();
+            sendFrame(imageData);
+        });
+    </script>
+
+    <div id="emotion-div"></div>
+</body>
+</html>

@@ -24,13 +24,11 @@ To get started with this project, follow these steps:
 
 1. Clone the repository:
 
-```git clone https://github.com/your-username/emotion-detection-ai.git
-```
+```git clone https://github.com/your-username/emotion-detection-ai.git```
 
 2. Install the necessary dependencies:
 
-```pip install -r requirements.txt
-```
+```pip install -r requirements.txt```
 
 3. Prepare the dataset:
 
@@ -46,8 +44,7 @@ To get started with this project, follow these steps:
    
    b. Run the training script:
    
-```python train.py
-```
+```python train.py```
 
 c. Monitor the training process and adjust parameters as needed.
 
@@ -55,8 +52,7 @@ c. Monitor the training process and adjust parameters as needed.
 
 a. Utilize the `test.py` script to run the emotion detection system on real-time data or provided input.
 
-```python test.py
-```
+```python test.py```
 
 b. Evaluate the performance of the model and analyze the emotion detection results.
 

@@ -2,24 +2,153 @@
 <html>
 <head>
     <title>Emotion Detection</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #video {
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+        }
+
+        #emotion-div {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .emotion-label {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .emotion-angry {
+            background-color: #ff6b6b;
+        }
+
+        .emotion-happy {
+            background-color: #7bed9f;
+        }
+
+        .emotion-neutral {
+            background-color: #b2bec3;
+        }
+
+        .emotion-sad {
+            background-color: #778ca3;
+        }
+
+        .emotion-surprise {
+            background-color: #ffb8b8;
+        }
+
+        #song-suggestions {
+            text-align: center;
+            margin-top: 20px;
+          }
+          
+          .song-suggestions-title {
+            font-weight: bold;
+          }
+          
+          .song-suggestions-list {
+            list-style-type: none;
+            padding: 0;
+          }
+          
+          .song-suggestions-list-item {
+            margin: 5px 0;
+          }
+          
+    </style>
 </head>
 <body>
     <h1>Emotion Detection</h1>
     <video id="video" width="640" height="480" autoplay></video>
-    <button id="capture">Capture</button>
 
-    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+    <div id="emotion-div"></div>
+
+    <div id="song-suggestions">
+        <p class="song-suggestions-title">Song suggestions:</p>
+      </div>
+      
 
     <script>
         const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureButton = document.getElementById('capture');
+        const emotionDiv = document.getElementById('emotion-div');
+        const songSuggestionsDiv = document.getElementById('song-suggestions');
+
+        const songsByMood = {
+            angry: [
+              'https://www.youtube.com/watch?v=ETNRfcNIl2w&ab_channel=SofieSo',
+              'https://www.youtube.com/watch?v=mQvteoFiMlg&ab_channel=EminemVEVO',
+              'https://www.youtube.com/watch?v=S9bCLPwzSC0&ab_channel=EminemVEVO',
+              'https://www.youtube.com/watch?v=_Yhyp-_hX2s&ab_channel=msvogue23',
+              'https://www.youtube.com/watch?v=WNeLUngb-Xg&ab_channel=TrapMusicHDTV',
+              'https://www.youtube.com/watch?v=WA4iX5D9Z64&ab_channel=TaylorSwiftVEVO',
+              'https://www.youtube.com/watch?v=xuhl6Ji5zHM&ab_channel=KanyeWestVEVO',
+              'https://www.youtube.com/watch?v=ndCI8DIM86w&list=RDGMEMHDXYb1_DDSgDsobPsOFxpA&start_radio=1&rv=xuhl6Ji5zHM&ab_channel=XXXTENTACION-Topic',
+              'https://www.youtube.com/watch?v=P9L_ZWVPX4g&list=RDGMEMHDXYb1_DDSgDsobPsOFxpA&index=4&ab_channel=TrevorDaniel-Topic'
+            ],
+            happy: [
+              'https://www.youtube.com/watch?v=AYcxiROIktI&ab_channel=T-Series',
+              'https://www.youtube.com/watch?v=ZbZSe6N_BXs&ab_channel=PharrellWilliamsVEVO',
+              'https://www.youtube.com/watch?v=ipii7KbbJLY&ab_channel=PopularMusic',
+              'https://www.youtube.com/watch?v=iPUmE-tne5U&ab_channel=KatrinaTheWavesVEVO',
+              'https://www.youtube.com/watch?v=ru0K8uYEZWw&ab_channel=justintimberlakeVEVO',
+              'https://www.youtube.com/watch?v=09R8_2nJtjg&ab_channel=Maroon5VEVO',
+              'https://www.youtube.com/watch?v=d-diB65scQU&ab_channel=BobbyMcFerrinVEVO',
+              'https://www.youtube.com/watch?v=6POZlJAZsok&ab_channel=GroverWashington%2CJr.-Topic',
+              'https://www.youtube.com/watch?v=HNBCVM4KbUM&ab_channel=BobMarleyVEVO'
+            ],
+            neutral: [
+              'https://www.youtube.com/watch?v=5mFTXbZzOAE',
+              'https://www.youtube.com/watch?v=k5VUKozfNsc',
+              'https://www.youtube.com/watch?v=_ae2j9jZY_U',
+              'https://www.youtube.com/watch?v=xCatIOFua2E'
+            ],
+            sad: [
+              'https://www.youtube.com/watch?v=HiXx5JFRxb4',
+              'https://www.youtube.com/watch?v=cyEvAHP8_60',
+              'https://www.youtube.com/watch?v=YwgNpObouB0',
+              'https://www.youtube.com/watch?v=xrcMgO2fgpA',
+              'https://www.youtube.com/watch?v=JNKjudIKkLg',
+              'https://www.youtube.com/watch?v=Z6L4u2i97Rw',
+              'https://www.youtube.com/watch?v=s-bZD3O3P80',
+              'https://www.youtube.com/watch?v=-aQMjByEeo8',
+              'https://youtu.be/DQ4r7HegRQw'
+            ],
+            surprise: [
+              'https://www.youtube.com/watch?v=ZbZSe6N_BXs&ab_channel=PharrellWilliamsVEVO',
+              'https://www.youtube.com/watch?v=21LGv8Cf0us&ab_channel=SCEntertainment',
+              'https://www.youtube.com/watch?v=ipii7KbbJLY&ab_channel=PopularMusic',
+              'https://www.youtube.com/watch?v=qK5KhQG06xU&ab_channel=Audioandlyrics',
+              'https://www.youtube.com/watch?v=eYSbUOoq4Vg&ab_channel=pluisje666',
+              'https://www.youtube.com/watch?v=1We3b8V45Rg&ab_channel=Uknow',
+              'https://www.youtube.com/watch?v=ApXoWvfEYVU&ab_channel=PostMaloneVEVO',
+              'https://www.youtube.com/watch?v=mRD0-GxqHVo&ab_channel=GlassAnimalsVEVO',
+              'https://www.youtube.com/watch?v=jJPMnTXl63E&ab_channel=PowfuVEVO',
+              'https://www.youtube.com/watch?v=kTJczUoc26U&ab_channel=TheKidLAROIVEVO'
+            ]
+          };
+          
 
         // Get access to the camera stream
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function(stream) {
                 video.srcObject = stream;
+                setInterval(captureAndSendFrame, 1000); // Capture and send frame every second
             })
             .catch(function(error) {
                 console.log('Error accessing camera:', error);
@@ -27,6 +156,9 @@
 
         // Capture the current frame from the video stream
         function captureFrame() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = canvas.toDataURL('image/jpeg');
             return imageData;
@@ -34,46 +166,60 @@
 
         // Send the captured frame to the server for emotion detection
         function sendFrame(imageData) {
-            fetch('/capture/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}', // Replace with the appropriate template variable
-                },
-                body: 'image_data=' + encodeURIComponent(imageData),
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                displayEmotions(data.emotion_list);
-            })
-            .catch(function(error) {
-                console.log('Error:', error);
-            });
+            // Simulating server response
+            const randomMood = getRandomMood();
+            displayEmotions([randomMood]);
         }
 
-        // Display the detected emotions on the webpage
-        function displayEmotions(emotionList) {
-            // Clear the previous emotions
-            const emotionDiv = document.getElementById('emotion-div');
-            emotionDiv.innerHTML = '';
-
-            // Create a new element for each emotion
-            emotionList.forEach(function(emotion) {
-                const emotionElement = document.createElement('p');
-                emotionElement.textContent = emotion;
-                emotionDiv.appendChild(emotionElement);
-            });
+        // Get a random mood from the songsByMood object
+        function getRandomMood() {
+            const moods = Object.keys(songsByMood);
+            const randomIndex = Math.floor(Math.random() * moods.length);
+            return moods[randomIndex];
         }
 
-        // Event listener for the capture button
-        captureButton.addEventListener('click', function() {
+        // Display the detected emotions on the webpage and suggest songs
+        // Display the detected emotions on the webpage and suggest songs
+function displayEmotions(emotionList) {
+    emotionDiv.innerHTML = '';
+    songSuggestionsDiv.innerHTML = '';
+  
+    emotionList.forEach(function (emotion) {
+      const emotionElement = document.createElement('span');
+      emotionElement.textContent = emotion;
+      emotionElement.classList.add('emotion-label');
+      emotionElement.classList.add('emotion-' + emotion.toLowerCase());
+      emotionDiv.appendChild(emotionElement);
+  
+      if (emotion.toLowerCase() in songsByMood) {
+        const songs = songsByMood[emotion.toLowerCase()];
+        if (songs.length > 0) {
+          const randomIndex = Math.floor(Math.random() * songs.length);
+          const randomSong = songs[randomIndex];
+  
+          const songLink = document.createElement('a');
+          songLink.textContent = randomSong;
+          songLink.href = randomSong;
+          songLink.target = '_blank';
+          songLink.classList.add('song-link');
+  
+          const songSuggestion = document.createElement('p');
+          songSuggestion.appendChild(document.createTextNode('Song suggestion: '));
+          songSuggestion.appendChild(songLink);
+          songSuggestionsDiv.appendChild(songSuggestion);
+        }
+      }
+    });
+  }
+  
+        
+        
+
+        // Capture and send frame
+        function captureAndSendFrame() {
             const imageData = captureFrame();
             sendFrame(imageData);
-        });
+        }
     </script>
-
-    <div id="emotion-div"></div>
 </body>
 </html>
